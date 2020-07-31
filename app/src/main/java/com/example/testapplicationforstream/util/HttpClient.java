@@ -1,59 +1,61 @@
 package com.example.testapplicationforstream.util;
 
-import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
-import com.example.testapplicationforstream.entity.NASAItem;
+import com.example.testapplicationforstream.callbacks.LoadCallback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 public class HttpClient {
+    private LoadCallback loadCallback;
     private URL url;
-    private Context context;
     private HttpURLConnection connection;
 
+    public HttpClient(LoadCallback loadCallback) {
+        this.loadCallback = loadCallback;
+    }
+
     public void setConnection() {
-        ArrayList<NASAItem> nasaItems;
-        final StringBuilder stringBuilder = new StringBuilder();
+        final Handler handler = new Handler();
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-
-                    url = new URL("https://images-api.nasa.gov/search?q=moon&media_type=image&page=1");
+                    url = new URL("https://images-api.nasa.gov/search?q=milky way&media_type=image");
                     connection = (HttpURLConnection) url.openConnection();
-                    Log.d("TAG", String.valueOf(connection.getResponseCode()));
+                    Log.d("HTTP", String.valueOf(connection.getResponseCode()));
+
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+                        InputStreamReader inputStreamReader =
+                                new InputStreamReader(connection.getInputStream());
+
                         BufferedReader in = new BufferedReader(inputStreamReader);
                         String line = in.readLine();
-                        stringBuilder.append(line);
-                        while (line != null){
-                            Log.d("TAG", "KUKU");
-                            line = in.readLine();
-                            Log.d("TAG", String.valueOf(line));
-                            stringBuilder.append(line);
-                        }
-
-                        String res = new String(stringBuilder);
                         JSONParser jsonParser = new JSONParser();
-                        jsonParser.parse(res);
-                        System.out.println(res);
-                        Log.d("TAG", res);
-                        //Если запрос выполнен удачно, читаем полученные данные и далее, делаем что-то
+                        jsonParser.parse(line);
+                        inputStreamReader.close();
+                        in.close();
+
                     } else {
-                        Log.d("TAG", "JOPA");
-                        //Если запрос выполнен не удачно, делаем что-то другое
+                        Log.d("HTTP", connection.getResponseMessage());
                     }
                 } catch (IOException e) {
-                    Log.d("TAG", String.valueOf(e));
-
+                    Log.d("HTTP", String.valueOf(e));
                     e.printStackTrace();
+                }
+                finally {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadCallback.onDataLoad();
+                        }
+                    });
                 }
             }
         });

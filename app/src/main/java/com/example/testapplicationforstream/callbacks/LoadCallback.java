@@ -1,4 +1,4 @@
-package com.example.testapplicationforstream.util;
+package com.example.testapplicationforstream.callbacks;
 
 public interface LoadCallback {
     void onDataLoad();

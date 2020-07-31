@@ -1,5 +1,5 @@
 package com.example.testapplicationforstream.util;
-import android.graphics.Bitmap;
+
 import android.util.Log;
 
 import com.example.testapplicationforstream.entity.NASAItem;
@@ -18,6 +18,7 @@ public class JSONParser {
             JSONObject jsonIn = new JSONObject(in);
             JSONObject jsonObject = jsonIn.getJSONObject("collection");
             JSONArray jsonArray = jsonObject.getJSONArray("items");
+
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsoObject = jsonArray.getJSONObject(i);
 
@@ -32,12 +33,13 @@ public class JSONParser {
                 String description = data.getString("description");
                 String imageDate = data.getString("date_created");
                 NASAItem nasaItem = new NASAItem(imageUrl, name, description, imageDate);
+
                 nasa.add(nasaItem);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d("TAG", nasa.size() + "size");
+        Log.d("SIZE", nasa.size() + "size");
     }
 
     public static ArrayList<NASAItem> getNasa() {
